@@ -1,100 +1,68 @@
 #!/usr/bin/env python3
-# log-anomaly-detector — AI-powered log analysis that uses LLMs to detect anomalies, correlate events across services, and generate incident summaries from raw application and system logs.
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from llm_client import LLM
-def tail(args):
-    """Stream logs and detect anomalies in real-time."""
-    llm = LLM()
-    print(f"Tailing {args.file}... (threshold: {args.anomaly_threshold})")
-    print(f"{'-'*60}")
-    patterns = []
-    with open(args.file) as f:
+import sys, os, argparse
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "backend"))
+from app.services.parser import LogParser
+from app.services.detector import AnomalyDetector
+from app.services.correlator import EventCorrelator
+from app.services.evaluator import ModelEvaluator
+from app.core.database import init_db
+
+def tail_cmd(args):
+    init_db()
+    if not os.path.exists(args.file):
+        sys.exit(f"File not found: {args.file}")
+    print(f"[*] Streaming {args.file} (threshold: {args.anomaly_threshold})")
+    with open(args.file, "r", encoding="utf-8") as f:
         for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            verdict = llm.classify(
-                text=f"Log line: {line}\nRecent context: {json.dumps(patterns[-5:], indent=0)}",
-                categories=["normal", "warning", "anomaly", "critical"],
-                instructions="Classify this log line. Consider: error codes, unusual timestamps, rate patterns, unexpected sequences. Be conservative — flag only genuine anomalies."
-            )
-            if verdict["category"] in ("anomaly", "critical"):
-                ts = line[:20] if len(line) > 20 else ""
-                print(f"\n{'!':*60}")
-                print(f"ANOMALY [{verdict['category'].upper()}] conf={verdict['confidence']}")
-                print(f"  {line[:120]}")
-                print(f"  Why: {verdict['reasoning'][:150]}")
-                print(f"{'!'*60}")
-            patterns.append(line[:200])
-            if len(patterns) > 100:
-                patterns.pop(0)
+            if not line.strip(): continue
+            lvl, msg, ts = LogParser.extract_level_and_clean(line.strip())
+            tpl_id, _, _ = LogParser.extract_template(msg)
+            v = AnomalyDetector.evaluate(args.service, lvl, msg, tpl_id, ts or "2026-10-07T12:00:00")
+            if v.anomaly_score >= args.anomaly_threshold:
+                print(f"[!] ANOMALY [{v.severity.upper()}] ({v.anomaly_score:.2f}): {msg[:100]}")
 
-def analyze(args):
-    """Analyze a log file for anomalies and correlations."""
-    llm = LLM()
-    logs = load_logs(args.file)
-    print(f"Loaded {len(logs)} log entries")
-    # Chunk and analyze
+def analyze_cmd(args):
+    init_db()
+    if not os.path.exists(args.file):
+        sys.exit(f"File not found: {args.file}")
+    with open(args.file, "r", encoding="utf-8") as f:
+        lines = [l.strip() for l in f if l.strip()]
     anomalies = []
-    chunk_size = 20
-    for i in range(0, len(logs), chunk_size):
-        chunk = logs[i:i+chunk_size]
-        verdict = llm.classify(
-            text=f"Log sequence:\n{json.dumps(chunk, indent=2)}",
-            categories=["normal", "degraded", "anomaly", "incident"],
-            instructions="Analyze this sequence of log entries. Look for: error bursts, timeout cascades, resource exhaustion patterns, unusual request patterns, security events."
-        )
-        if verdict["category"] != "normal":
-            anomalies.append({"range": f"{i}-{i+len(chunk)}", "assessment": verdict, "logs": chunk})
-    # Correlate
-    if args.correlate and len(anomalies) > 1:
-        timeline = llm.generate(
-            f"Here are correlated anomalies from the same log file:\n{json.dumps(anomalies, indent=2)}\n\nReconstruct the incident timeline. What happened, in what order, and what's the likely root cause?",
-            system="You are an SRE reconstructing an incident timeline. Be precise with timestamps and causal links."
-        )
-        print(f"\n{'='*60}\nINCIDENT TIMELINE\n{'='*60}\n{timeline}")
-    print(f"\nAnomalies detected: {len(anomalies)}")
+    for i, line in enumerate(lines):
+        lvl, msg, ts = LogParser.extract_level_and_clean(line)
+        tpl_id, _, _ = LogParser.extract_template(msg)
+        v = AnomalyDetector.evaluate(args.service, lvl, msg, tpl_id, ts or f"2026-10-07T12:00:{i%60:02d}")
+        if v.is_anomaly:
+            anomalies.append({"id": f"log_{i}", "timestamp": ts or "2026-10-07T12:00:00", "service": args.service, "level": lvl, "message": msg, "anomaly_score": v.anomaly_score})
+    print(f"[+] Anomalies: {len(anomalies)} / {len(lines)}")
+    if args.correlate and anomalies:
+        g = EventCorrelator.build_correlation_graph(anomalies)
+        print(f"[+] Correlated DAG: {len(g.nodes)} nodes, {len(g.edges)} cascade edges. Root: {g.root_cause_candidate}")
 
-def incident(args):
-    """Generate an incident report for a specific time window."""
-    llm = LLM()
-    print(f"Generating incident report for {args.time} (window: {args.window})")
-    # Load logs around the time
-    logs = load_logs("incident_logs.json")
-    summary = llm.generate(
-        f"Incident window: {args.time} (+/- {args.window})\n\nLogs:\n{json.dumps(logs[:100], indent=2)}\n\nGenerate: 1) Impact Assessment 2) Timeline 3) Root Cause Hypothesis 4) Remediation Steps 5) Communication Draft (for stakeholders)",
-        system="You are an incident commander. Write a post-incident review that's actionable and honest."
-    )
-    print(summary)
+def bench_cmd(_):
+    init_db()
+    r = ModelEvaluator.run_benchmark()
+    print(f"Dataset: {r.dataset_name} | F1: {r.f1_score:.4f} (Baseline: {r.baseline_f1:.4f}, +{r.f1_improvement_pct:.1f}%) | Latency: {r.latency_ms_per_item:.2f}ms")
 
-def load_logs(path):
-    try:
-        with open(path) as f:
-            content = f.read().strip()
-        # Try JSON lines
-        try:
-            return [json.loads(line) for line in content.split("\n") if line.strip()]
-        except json.JSONDecodeError:
-            return [line for line in content.split("\n") if line.strip()]
-    except FileNotFoundError:
-        # Generate sample logs for demo
-        return generate_sample_logs()
+def main():
+    p = argparse.ArgumentParser(description="Log Anomaly Detector CLI")
+    sub = p.add_subparsers(dest="command", required=True)
+    t = sub.add_parser("tail")
+    t.add_argument("-f", "--file", required=True)
+    t.add_argument("--service", default="api-gateway")
+    t.add_argument("--anomaly-threshold", type=float, default=0.60)
+    t.set_defaults(func=tail_cmd)
+    a = sub.add_parser("analyze")
+    a.add_argument("--file", required=True)
+    a.add_argument("--service", default="api-gateway")
+    a.add_argument("--correlate", action="store_true")
+    a.set_defaults(func=analyze_cmd)
+    b = sub.add_parser("benchmark")
+    b.set_defaults(func=bench_cmd)
+    args = p.parse_args()
+    args.func(args)
 
-def generate_sample_logs():
-    import random
-    logs = []
-    services = ["api-gateway", "auth-service", "payment-service", "db-proxy", "cache-layer"]
-    for i in range(50):
-        svc = random.choice(services)
-        level = random.choices(["INFO", "WARN", "ERROR", "CRITICAL"], weights=[70, 15, 10, 5])[0]
-        msg = random.choice([
-            "Request completed", "Connection pool exhausted", "Timeout after 30s",
-            "Authentication failed for user", "Cache miss", "Slow query: 2.3s",
-            "Memory usage at 92%", "Circuit breaker OPEN", "Retry attempt 3/5"
-        ])
-        logs.append({"ts": f"2026-04-09T14:{i//60:02d}:{i%60:02d}", "service": svc, "level": level, "msg": msg})
-    return logs
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
