@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "log-anomaly-detector-alan-vo",
+  "owner": "ALANDVO",
+  "email": "alanvo@gmail.com",
+  "domain": "AI-powered Log Anomaly Detection & Incident Root-Cause Analysis",
+  "workflows": [
+    "Log ingestion and statistical template anomaly scoring",
+    "Cross-service event correlation and cascading failure clustering",
+    "Incident timeline reconstruction, opt-in LLM root-cause advisory, and postmortem export",
+    "Reproducible ML benchmark evaluation against labeled ground-truth log anomalies"
+  ],
+  "auth": "oidc-keycloak-saml-broker",
+  "llm_providers": [
+    "openai-compatible",
+    "anthropic",
+    "gemini",
+    "ollama"
+  ],
+  "summary": "AI-driven log anomaly detector combining deterministic template sequence mining with multi-provider LLM incident correlation and root-cause advisory.",
+  "version": "1.0.0"
+}

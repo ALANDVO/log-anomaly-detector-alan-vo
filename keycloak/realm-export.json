@@ -1,0 +1,57 @@
+{
+  "realm": "master",
+  "enabled": true,
+  "displayName": "Log Anomaly Detector Realm",
+  "clients": [
+    {
+      "clientId": "log-anomaly-detector",
+      "name": "Log Anomaly Detector Application",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://127.0.0.1:8000/api/auth/callback",
+        "http://localhost:8000/api/auth/callback"
+      ],
+      "webOrigins": [
+        "http://127.0.0.1:3000",
+        "http://localhost:3000"
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "role_list",
+        "roles",
+        "profile",
+        "email"
+      ]
+    }
+  ],
+  "roles": {
+    "realm": [
+      { "name": "admin", "description": "Administrator with full system and audit log access" },
+      { "name": "analyst", "description": "Security/SRE analyst with incident mutation privileges" },
+      { "name": "viewer", "description": "Read-only viewer for anomaly streams and dashboards" }
+    ]
+  },
+  "identityProviders": [
+    {
+      "alias": "saml-idp-broker",
+      "displayName": "Upstream SAML Identity Provider",
+      "providerId": "saml",
+      "enabled": false,
+      "trustEmail": true,
+      "storeToken": false,
+      "addReadTokenRoleOnCreate": false,
+      "config": {
+        "entityId": "https://idp.example.com/entity",
+        "singleSignOnServiceUrl": "https://idp.example.com/sso",
+        "nameIDPolicyFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+        "signatureAlgorithm": "RSA_SHA256"
+      }
+    }
+  ]
+}
