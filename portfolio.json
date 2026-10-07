@@ -17,5 +17,6 @@
     "gemini",
     "ollama"
   ],
-  "summary": "AI-driven log anomaly detector combining deterministic template sequence mining with multi-provider LLM incident correlation and root-cause advisory."
+  "summary": "AI-driven log anomaly detector combining deterministic template sequence mining with multi-provider LLM incident correlation and root-cause advisory.",
+  "version": "1.0.0"
 }
