@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Incident root-cause selection follows the service dependency graph. A downstream symptom logged before the upstream failure is no longer stored as the origin. The incident window stays chronological, and cascade edges are ordered by UTC instant rather than raw timestamp text. Correlation looks back from the newest unassigned anomaly, so an already closed incident does not hide an older cascade.
 - Log level parsing only accepts a prefix token (`ERROR`, `[ERROR]`, or `auth-service ERROR`). Words such as "error" or "info" inside the message body no longer override the structured level.
+- Added test suite fixture in backend/tests/conftest.py ensuring automatic SQLite schema initialization on clean CI test runs.
 
 ## [1.0.0] - 2026-10-07
 
