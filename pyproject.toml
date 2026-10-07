@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "log-anomaly-detector-alan-vo"
-version = "1.0.0"
+version = "1.1.0"
 description = "AI-powered Log Anomaly Detection, Cross-Service Event Correlation, and Root-Cause Advisory"
 readme = "README.md"
 requires-python = ">=3.12"
