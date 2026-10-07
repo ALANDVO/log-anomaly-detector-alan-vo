@@ -1,6 +1,6 @@
 # log-anomaly-detector-alan-vo | Alan Vo | AI & Machine Learning
 
-Current version: `1.0.0`.
+Current version: `1.1.0`.
 
 Distributed microservice environments generate high-velocity, semi-structured log streams that overwhelm site reliability and security operations teams with alert fatigue while subtle cascading degradations go unnoticed. **log-anomaly-detector-alan-vo** addresses this challenge by pairing a deterministic, offline machine learning pipeline—combining token-based Drain template mining, Shannon token entropy scoring, and sliding-window error burst z-scores—with a temporal cross-service cascade correlation engine and opt-in, grounded multi-provider LLM root-cause advisory. Designed for SREs, platform engineers, and cloud architects, the system operates completely offline without external API keys, while providing structured postmortem generation and SSO authorization.
 

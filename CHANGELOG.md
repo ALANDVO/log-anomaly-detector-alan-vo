@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.1.0] - 2026-10-07
+
 All notable changes to `log-anomaly-detector-alan-vo` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
