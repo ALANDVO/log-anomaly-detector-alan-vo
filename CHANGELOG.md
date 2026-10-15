@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0 — work-in-progress checkpoint
+
+Partial code published for continued development. Known issues: STATUS.md.
+
 ## [1.1.0] - 2026-10-07
 
 All notable changes to `log-anomaly-detector-alan-vo` will be documented in this file.
@@ -7,13 +11,18 @@ All notable changes to `log-anomaly-detector-alan-vo` will be documented in this
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] - 2026-10-15
 
-### Fixed
-- Incident root-cause selection follows the service dependency graph. A downstream symptom logged before the upstream failure is no longer stored as the origin. The incident window stays chronological, and cascade edges are ordered by UTC instant rather than raw timestamp text. Correlation looks back from the newest unassigned anomaly, so an already closed incident does not hide an older cascade.
-- Log level parsing only accepts a prefix token (`ERROR`, `[ERROR]`, or `auth-service ERROR`). Words such as "error" or "info" inside the message body no longer override the structured level.
-- Added test suite fixture in backend/tests/conftest.py ensuring automatic SQLite schema initialization on clean CI test runs.
+### Added
+- Configurable service dependency topology persisted in SQLite database.
+- REST API endpoints for dependency CRUD operations: `GET/POST/PATCH/DELETE /api/dependencies`.
+- Correlator now reads live topology from database instead of hardcoded constants.
+- Frontend DependencyView component for viewing and managing service dependencies (analyst/admin mutate, viewer read-only).
+- Default topology seeded on first run for backward compatibility (db-proxy, cache-layer, auth-service, payment-service).
+- Full audit trail for all dependency mutations.
+- Backend tests (7) and frontend test (1) for new dependency topology feature.
 
+## [1.1.0] - 2026-10-07
 ## [1.0.0] - 2026-10-07
 
 ### Added

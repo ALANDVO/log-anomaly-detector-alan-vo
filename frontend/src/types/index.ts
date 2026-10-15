@@ -48,8 +48,20 @@ export interface BenchmarkResult {
   failure_cases: Array<{ id: string; error_type: string; message: string; verdict_score: number; reasons: string[]; explanation: string; }>;
   limitations: string[];
 }
-
 export interface AuditRecord {
   id: string; timestamp: string; user_id: string; username: string; action: string;
   entity_type: string; entity_id: string; details: string | null; ip_address: string;
+}
+
+export interface ServiceDependency {
+  id: string; upstream: string; downstream: string; relationship: string;
+  created_at: string; updated_at: string;
+}
+
+export interface ServiceDependencyCreate {
+  upstream: string; downstream: string; relationship?: string;
+}
+
+export interface ServiceDependencyUpdate {
+  upstream?: string; downstream?: string; relationship?: string;
 }

@@ -72,6 +72,27 @@ class LLMAdvisoryResponse(BaseModel):
     is_advisory: bool = True; grounded_record_count: int; root_cause_hypothesis: str
     recommended_remediation: List[str]; timeline_narrative: str; provider_error: Optional[str] = None
 
+class ServiceDependencyBase(BaseModel):
+    upstream: str = Field(..., description="Upstream service name (dependency provider)")
+    downstream: str = Field(..., description="Downstream service name (consumer)")
+    relationship: str = Field(default="depends_on", description="Relationship type")
+
+class ServiceDependencyCreate(ServiceDependencyBase):
+    pass
+
+class ServiceDependencyUpdate(BaseModel):
+    upstream: Optional[str] = None
+    downstream: Optional[str] = None
+    relationship: Optional[str] = None
+
+class ServiceDependencyResponse(ServiceDependencyBase):
+    id: str
+    created_at: str
+    updated_at: str
+
+    class Config:
+        from_attributes = True
+
 class LabeledLogItem(BaseModel):
     id: str; service: str; level: str; message: str; is_ground_truth_anomaly: bool; ground_truth_category: str
 

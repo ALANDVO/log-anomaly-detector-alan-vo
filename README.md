@@ -1,6 +1,9 @@
 # log-anomaly-detector-alan-vo | Alan Vo | AI & Machine Learning
 
-Current version: `1.1.0`.
+> Work in progress. This checkpoint may be incomplete or fail tests. See PLAN.md and STATUS.md before use.
+
+
+Current version: `1.2.0`.
 
 Distributed microservice environments generate high-velocity, semi-structured log streams that overwhelm site reliability and security operations teams with alert fatigue while subtle cascading degradations go unnoticed. **log-anomaly-detector-alan-vo** addresses this challenge by pairing a deterministic, offline machine learning pipeline—combining token-based Drain template mining, Shannon token entropy scoring, and sliding-window error burst z-scores—with a temporal cross-service cascade correlation engine and opt-in, grounded multi-provider LLM root-cause advisory. Designed for SREs, platform engineers, and cloud architects, the system operates completely offline without external API keys, while providing structured postmortem generation and SSO authorization.
 
@@ -95,6 +98,11 @@ curl -s http://127.0.0.1:8000/api/evaluation/benchmark
    - Computes precision, recall, F1 score, confusion matrix, and inference latency against verified ground-truth datasets.
    - Logs immutable run records to the audit ledger.
 
+5. **Configurable Service Dependency Topology:**
+   - Operators define upstream/downstream service relationships via REST API.
+   - Correlator reads live topology from database for root-cause analysis.
+   - Default topology seeded on first run; changes take effect immediately.
+   - Full audit trail for all dependency mutations.
 ## Quick Start & Installation
 
 ### Prerequisites
@@ -126,10 +134,10 @@ cp .env.example .env
 ### Running Tests
 
 ```bash
-# Backend pytest suite (20 tests covering domain logic, auth, and API workflows)
+# Backend pytest suite (32 tests covering domain logic, auth, API workflows, and dependency topology)
 PYTHONPATH=backend .venv/bin/python -m pytest -v backend/tests
 
-# Frontend Vitest suite (testing navigation, telemetry, and benchmark views)
+# Frontend Vitest suite (testing navigation, telemetry, benchmark, and dependency views)
 cd frontend && npm test && npm run build && cd ..
 ```
 
@@ -175,7 +183,10 @@ docker compose up --build
 | `GET` | `/api/incidents/{id}/export` | Viewer | Exports postmortem in Markdown or JSON |
 | `GET` | `/api/evaluation/benchmark` | Viewer | Runs reproducible ML benchmark and returns metrics |
 | `GET` | `/api/audit` | Admin | Queries administrative audit trails |
-
+| `GET` | `/api/dependencies` | Viewer | Lists service dependencies with optional filters |
+| `POST`| `/api/dependencies` | Analyst | Creates a new service dependency |
+| `PATCH`| `/api/dependencies/{id}` | Analyst | Updates an existing service dependency |
+| `DELETE`| `/api/dependencies/{id}` | Analyst | Deletes a service dependency |
 ## Provider Configuration
 
 All LLM integrations are opt-in and handled strictly server-side. The offline core functions completely without any provider credentials.

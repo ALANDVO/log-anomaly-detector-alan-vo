@@ -1,6 +1,7 @@
 import {
   UserSession, LogEntry, LogStats, LogTemplate, Incident, IncidentDetail,
-  LLMAdvisoryResult, BenchmarkResult, AuditRecord
+  LLMAdvisoryResult, BenchmarkResult, AuditRecord,
+  ServiceDependency, ServiceDependencyCreate, ServiceDependencyUpdate
 } from '../types';
 
 let currentCsrf = '';
@@ -68,5 +69,19 @@ export const api = {
     request(`/api/incidents/${id}/export?format=${fmt}`),
   getBenchmark: () => request<BenchmarkResult>('/api/evaluation/benchmark'),
   runBenchmark: () => request<BenchmarkResult>('/api/evaluation/benchmark', { method: 'POST' }),
-  getAuditLogs: () => request<AuditRecord[]>('/api/audit')
+  getAuditLogs: () => request<AuditRecord[]>('/api/audit'),
+  getDependencies: (params: { upstream?: string; downstream?: string; limit?: number; offset?: number } = {}) => {
+    const q = new URLSearchParams();
+    if (params.upstream) q.set('upstream', params.upstream);
+    if (params.downstream) q.set('downstream', params.downstream);
+    if (params.limit) q.set('limit', String(params.limit));
+    if (params.offset) q.set('offset', String(params.offset));
+    return request<ServiceDependency[]>(`/api/dependencies?${q}`);
+  },
+  createDependency: (dep: ServiceDependencyCreate) =>
+    request<ServiceDependency>('/api/dependencies', { method: 'POST', body: JSON.stringify(dep) }),
+  updateDependency: (id: string, dep: ServiceDependencyUpdate) =>
+    request<ServiceDependency>(`/api/dependencies/${id}`, { method: 'PATCH', body: JSON.stringify(dep) }),
+  deleteDependency: (id: string) =>
+    request(`/api/dependencies/${id}`, { method: 'DELETE' })
 };
