@@ -4,13 +4,6 @@ from typing import List, Dict, Any, Optional
 from app.core.database import transaction
 from app.models.schemas import CorrelationGraph, CascadeNode, CascadeEdge
 
-SERVICE_DEPENDENCIES = {
-    "db-proxy": ["auth-service", "payment-service", "order-service"],
-    "cache-layer": ["api-gateway", "auth-service"],
-    "auth-service": ["api-gateway"],
-    "payment-service": ["api-gateway", "order-service"]
-}
-
 class EventCorrelator:
     @staticmethod
     def _event_time(log: Dict[str, Any]) -> float:
@@ -23,13 +16,26 @@ class EventCorrelator:
             return float("inf")
 
     @classmethod
+    def _get_dependencies(cls) -> Dict[str, List[str]]:
+        """Fetch current service dependencies from database."""
+        with transaction() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT upstream, downstream FROM service_dependencies")
+            rows = cursor.fetchall()
+        deps: Dict[str, List[str]] = {}
+        for row in rows:
+            deps.setdefault(row["upstream"], []).append(row["downstream"])
+        return deps
+
+    @classmethod
     def _downstream(cls, service: str) -> set:
-        seen, stack = set(), list(SERVICE_DEPENDENCIES.get(service, []))
+        deps = cls._get_dependencies()
+        seen, stack = set(), list(deps.get(service, []))
         while stack:
             nxt = stack.pop()
             if nxt not in seen:
                 seen.add(nxt)
-                stack.extend(SERVICE_DEPENDENCIES.get(nxt, []))
+                stack.extend(deps.get(nxt, []))
         return seen
 
     @classmethod
@@ -112,12 +118,13 @@ class EventCorrelator:
             for l in sorted_logs
         ]
         edges = []
+        deps = cls._get_dependencies()
         for i in range(len(sorted_logs) - 1):
             src, tgt = sorted_logs[i], sorted_logs[i + 1]
             t0, t1 = cls._event_time(src), cls._event_time(tgt)
             delay = 0.0 if t0 == float("inf") or t1 == float("inf") else max(0.0, round(t1 - t0, 2))
 
-            if tgt["service"] in SERVICE_DEPENDENCIES.get(src["service"], []): rel = "downstream_dependency_cascade"
+            if tgt["service"] in deps.get(src["service"], []): rel = "downstream_dependency_cascade"
             elif src["service"] == tgt["service"]: rel = "same_service_consecutive_error"
             else: rel = "correlated_temporal_cluster"
 

@@ -16,6 +16,7 @@ export const Navbar: React.FC<NavbarProps> = ({ session, activeTab, onTabChange,
     { id: 'logs', label: 'Log Stream' },
     { id: 'incidents', label: 'Incident Cascades' },
     { id: 'evaluation', label: 'ML Benchmark' },
+    { id: 'dependencies', label: 'Dependencies' },
     ...(session?.user.role === 'admin' ? [{ id: 'audit', label: 'Audit Trail' }] : [])
   ];
 

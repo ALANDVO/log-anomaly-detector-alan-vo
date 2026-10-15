@@ -6,12 +6,14 @@ from app.core.config import settings
 
 _thread_local = threading.local()
 
+
 def get_db_path() -> str:
     raw = settings.DATABASE_URL
     p_str = raw[len("sqlite:///"):] if raw.startswith("sqlite:///") else (raw[len("sqlite://"):] if raw.startswith("sqlite://") else raw)
     p = Path(p_str).resolve()
     p.parent.mkdir(parents=True, exist_ok=True)
     return str(p)
+
 
 def get_connection() -> sqlite3.Connection:
     conn = sqlite3.connect(get_db_path(), check_same_thread=False, timeout=30.0)
@@ -21,11 +23,16 @@ def get_connection() -> sqlite3.Connection:
     conn.execute("PRAGMA busy_timeout = 5000;")
     return conn
 
+
 @contextmanager
 def transaction(existing_conn: Optional[sqlite3.Connection] = None) -> Generator[sqlite3.Connection, None, None]:
-    if existing_conn is not None: yield existing_conn; return
+    if existing_conn is not None:
+        yield existing_conn
+        return
     current = getattr(_thread_local, "conn", None)
-    if current is not None: yield current; return
+    if current is not None:
+        yield current
+        return
 
     conn = get_connection()
     _thread_local.conn = conn
@@ -33,12 +40,16 @@ def transaction(existing_conn: Optional[sqlite3.Connection] = None) -> Generator
         yield conn
         conn.commit()
     except Exception:
-        conn.rollback(); raise
+        conn.rollback()
+        raise
     finally:
         _thread_local.conn = None
         conn.close()
 
+
 def init_db() -> None:
+    from datetime import datetime, timezone
+    import uuid
     with transaction() as conn:
         conn.executescript("""
         CREATE TABLE IF NOT EXISTS users (
@@ -88,15 +99,40 @@ def init_db() -> None:
             baseline_precision REAL NOT NULL, baseline_recall REAL NOT NULL, baseline_f1 REAL NOT NULL,
             latency_ms REAL NOT NULL, details TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS service_dependencies (
+            id TEXT PRIMARY KEY, upstream TEXT NOT NULL, downstream TEXT NOT NULL,
+            relationship TEXT NOT NULL DEFAULT 'depends_on', created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+            UNIQUE(upstream, downstream)
+        );
+        CREATE INDEX IF NOT EXISTS idx_service_dependencies_upstream ON service_dependencies(upstream);
+        CREATE INDEX IF NOT EXISTS idx_service_dependencies_downstream ON service_dependencies(downstream);
         """)
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) as c FROM users")
         if cursor.fetchone()["c"] == 0:
-            from datetime import datetime, timezone
             now = datetime.now(timezone.utc).isoformat()
             cursor.executemany(
                 "INSERT INTO users (id, username, email, role, created_at) VALUES (?, ?, ?, ?, ?)",
                 [("usr-admin", "admin", "admin@alanvo.local", "admin", now),
                  ("usr-analyst", "analyst", "analyst@alanvo.local", "analyst", now),
                  ("usr-viewer", "viewer", "viewer@alanvo.local", "viewer", now)]
+            )
+
+        # Seed default service dependencies if table is empty
+        cursor.execute("SELECT COUNT(*) as c FROM service_dependencies")
+        if cursor.fetchone()["c"] == 0:
+            now = datetime.now(timezone.utc).isoformat()
+            defaults = [
+                ("db-proxy", "auth-service", "depends_on"),
+                ("db-proxy", "payment-service", "depends_on"),
+                ("db-proxy", "order-service", "depends_on"),
+                ("cache-layer", "api-gateway", "depends_on"),
+                ("cache-layer", "auth-service", "depends_on"),
+                ("auth-service", "api-gateway", "depends_on"),
+                ("payment-service", "api-gateway", "depends_on"),
+                ("payment-service", "order-service", "depends_on"),
+            ]
+            cursor.executemany(
+                "INSERT INTO service_dependencies (id, upstream, downstream, relationship, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+                [(f"dep_{uuid.uuid4().hex[:10]}", u, d, r, now, now) for u, d, r in defaults]
             )
