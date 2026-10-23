@@ -7,7 +7,7 @@ import { LogStream } from './components/LogStream';
 import { IncidentView } from './components/IncidentView';
 import { EvaluationView } from './components/EvaluationView';
 import { AuditView } from './components/AuditView';
-import { DependencyView } from './components/DependencyView';
+import { ThresholdView } from './components/ThresholdView';
 import { AlertCircle, ShieldAlert } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -89,7 +89,7 @@ export const App: React.FC = () => {
         {activeTab === 'logs' && <LogStream canMutate={canMutate} />}
         {activeTab === 'incidents' && <IncidentView canMutate={canMutate} />}
         {activeTab === 'evaluation' && <EvaluationView canMutate={canMutate} />}
-        {activeTab === 'dependencies' && <DependencyView canMutate={canMutate} />}
+        {activeTab === 'thresholds' && <ThresholdView canMutate={canMutate} />}
         {activeTab === 'audit' && session?.user.role === 'admin' && <AuditView />}
       </main>
 

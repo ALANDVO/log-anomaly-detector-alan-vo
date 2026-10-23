@@ -4,7 +4,7 @@ Each round completes one feature or repair. Future items are planned, not implem
 
 ## Current round
 
-configurable-service-dependencies
+detector-threshold-configuration
 
 ## Roadmap
 
@@ -21,7 +21,20 @@ Acceptance:
 - Role-based access: viewers can read, analysts/admins can mutate
 - Audit trail records all dependency mutations
 
-Implementation: `backend/app/models/schemas.py: add ServiceDependency schemas`, `backend/app/core/database.py: add service_dependencies table to init_db`, `backend/app/services/correlator.py: replace SERVICE_DEPENDENCIES constant with DB lookup`, `backend/app/api/dependencies.py: new API router with CRUD endpoints`, `backend/app/main.py: register dependencies router`, `backend/app/api/logs.py: import EventCorrelator after DB init (no change needed)`, `frontend/src/types/index.ts: add ServiceDependency type`, `frontend/src/api/client.ts: add dependency API methods`, `frontend/src/components/DependencyView.tsx: new component for dependency management`, `frontend/src/App.tsx: register DependencyView route`, `frontend/src/components/Navbar.tsx: add Dependencies tab`
+Implementation: `backend/app/models/schemas.py: add ServiceDependency schemas`, `backend/app/core/database.py: add service_dependencies table to init_db`, `backend/app/services/correlator.py: replace SERVICE_DEPENDENCIES constant with DB lookup`, `backend/app/api/dependencies.py: new API router with CRUD endpoints`, `backend/app/main.py: register dependencies router`, `backend/app/api/logs.py: import EventCorrelator after DB init (no change needed)`, `frontend/src/types/index.ts: add ServiceDependency type`, `frontend/src/api/client.ts: add dependency API methods`, `frontend/src/components/DependencyView.tsx: new component for dependency management`, `frontend/src/App.tsx: register DependencyView route`, `frontend/src/components/Navbar.tsx: add Dependencies nav item`
 
 Tests: `backend/tests/test_dependencies.py: new test file for dependency CRUD and correlator integration`, `frontend/src/__tests__/DependencyView.test.tsx: new frontend test`
+
+### detector-threshold-configuration — Configurable Anomaly Detection Thresholds with Persistence
+
+Status: in_progress
+
+Acceptance:
+- Anomaly detection thresholds (anomaly threshold, severity bands) stored in SQLite database
+- REST API endpoints for GET/PUT threshold configuration (analyst/admin roles)
+- Detector uses database-backed thresholds at evaluation time
+- Default thresholds seeded on first run for backward compatibility
+- Frontend UI for viewing and adjusting thresholds (analyst/admin roles)
+- Role-based access: viewers can read, analysts/admins can mutate
+- Audit trail records all threshold mutations
 

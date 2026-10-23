@@ -99,6 +99,11 @@ def init_db() -> None:
             baseline_precision REAL NOT NULL, baseline_recall REAL NOT NULL, baseline_f1 REAL NOT NULL,
             latency_ms REAL NOT NULL, details TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS threshold_config (
+            id TEXT PRIMARY KEY, config_key TEXT UNIQUE NOT NULL, config_value REAL NOT NULL,
+            description TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+        );
+
         CREATE TABLE IF NOT EXISTS service_dependencies (
             id TEXT PRIMARY KEY, upstream TEXT NOT NULL, downstream TEXT NOT NULL,
             relationship TEXT NOT NULL DEFAULT 'depends_on', created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
@@ -116,6 +121,32 @@ def init_db() -> None:
                 [("usr-admin", "admin", "admin@alanvo.local", "admin", now),
                  ("usr-analyst", "analyst", "analyst@alanvo.local", "analyst", now),
                  ("usr-viewer", "viewer", "viewer@alanvo.local", "viewer", now)]
+            )
+
+        # Seed default threshold config if table is empty
+        cursor.execute("SELECT COUNT(*) as c FROM threshold_config")
+        if cursor.fetchone()["c"] == 0:
+            now = datetime.now(timezone.utc).isoformat()
+            defaults = [
+                ("anomaly_threshold", 0.50, "Minimum anomaly score to classify as anomaly"),
+                ("severity_critical", 0.80, "Anomaly score threshold for critical severity"),
+                ("severity_high", 0.65, "Anomaly score threshold for high severity"),
+                ("severity_medium", 0.40, "Anomaly score threshold for medium severity"),
+                ("level_critical_weight", 0.40, "Weight added for CRITICAL log level"),
+                ("level_error_weight", 0.25, "Weight added for ERROR log level"),
+                ("level_warn_weight", 0.10, "Weight added for WARN log level"),
+                ("rarity_first_occurrence", 0.35, "Score for first occurrence of template"),
+                ("rarity_under_5", 0.20, "Score for template with < 5 occurrences"),
+                ("burst_high_density", 0.35, "Score for high error density (>40%)"),
+                ("burst_elevated", 0.20, "Score for elevated error burst (>20%)"),
+                ("entropy_high_threshold", 4.2, "Token entropy threshold for high entropy bonus"),
+                ("entropy_high_bonus", 0.15, "Score bonus for high token entropy"),
+                ("entropy_low_threshold", 1.0, "Token entropy threshold for low entropy bonus"),
+                ("entropy_low_bonus", 0.10, "Score bonus for low token entropy"),
+            ]
+            cursor.executemany(
+                "INSERT INTO threshold_config (id, config_key, config_value, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+                [(f"thr_{uuid.uuid4().hex[:10]}", k, v, d, now, now) for k, v, d in defaults]
             )
 
         # Seed default service dependencies if table is empty

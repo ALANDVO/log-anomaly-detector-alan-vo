@@ -58,6 +58,19 @@ export interface ServiceDependency {
   created_at: string; updated_at: string;
 }
 
+export interface ThresholdConfig {
+  id: string;
+  config_key: string;
+  config_value: number;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ThresholdConfigUpdate {
+  config_value: number;
+}
+
 export interface ServiceDependencyCreate {
   upstream: string; downstream: string; relationship?: string;
 }

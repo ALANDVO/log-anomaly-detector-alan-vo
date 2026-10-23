@@ -93,6 +93,22 @@ class ServiceDependencyResponse(ServiceDependencyBase):
     class Config:
         from_attributes = True
 
+class ThresholdConfigBase(BaseModel):
+    config_key: str = Field(..., description="Configuration key identifier")
+    config_value: float = Field(..., description="Configuration value")
+    description: Optional[str] = Field(None, description="Human-readable description")
+
+class ThresholdConfigUpdate(BaseModel):
+    config_value: float = Field(..., description="New configuration value")
+
+class ThresholdConfigResponse(ThresholdConfigBase):
+    id: str
+    created_at: str
+    updated_at: str
+
+    class Config:
+        from_attributes = True
+
 class LabeledLogItem(BaseModel):
     id: str; service: str; level: str; message: str; is_ground_truth_anomaly: bool; ground_truth_category: str
 
