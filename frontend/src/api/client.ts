@@ -1,7 +1,8 @@
 import {
   UserSession, LogEntry, LogStats, LogTemplate, Incident, IncidentDetail,
   LLMAdvisoryResult, BenchmarkResult, AuditRecord,
-  ServiceDependency, ServiceDependencyCreate, ServiceDependencyUpdate
+  ServiceDependency, ServiceDependencyCreate, ServiceDependencyUpdate,
+  ThresholdConfig, ThresholdConfigUpdate
 } from '../types';
 
 let currentCsrf = '';
@@ -83,5 +84,8 @@ export const api = {
   updateDependency: (id: string, dep: ServiceDependencyUpdate) =>
     request<ServiceDependency>(`/api/dependencies/${id}`, { method: 'PATCH', body: JSON.stringify(dep) }),
   deleteDependency: (id: string) =>
-    request(`/api/dependencies/${id}`, { method: 'DELETE' })
+    request(`/api/dependencies/${id}`, { method: 'DELETE' }),
+  getThresholds: () => request<ThresholdConfig[]>('/api/thresholds'),
+  updateThreshold: (config_key: string, value: number) =>
+    request<ThresholdConfig>(`/api/thresholds/${encodeURIComponent(config_key)}`, { method: 'PUT', body: JSON.stringify({ config_value: value }) }),
 };
