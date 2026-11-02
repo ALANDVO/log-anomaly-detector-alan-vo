@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.core.database import init_db
 from app.api.auth import router as auth_router
+from app.api.dependencies import router as dependencies_router
 from app.api.audit import router as audit_router
 from app.api.thresholds import router as thresholds_router
 from app.api.logs import router as logs_router
@@ -61,6 +62,7 @@ app.include_router(incidents_router)
 app.include_router(eval_router)
 app.include_router(audit_router)
 app.include_router(thresholds_router)
+app.include_router(dependencies_router)
 
 @app.get("/api/health", tags=["Health"])
 async def health_check():

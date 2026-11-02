@@ -38,7 +38,7 @@ async def list_thresholds(
 async def update_threshold(
     config_key: str,
     payload: ThresholdConfigUpdate,
-    user: dict = Depends(require_role("analyst", "admin")),
+    user: dict = Depends(require_role("analyst")),
     request: Request = None,
     _csrf: None = Depends(verify_csrf),
 ):
@@ -64,8 +64,8 @@ async def update_threshold(
 
         # Audit trail
         ip = request.client.host if request and request.client else "unknown"
-        AuditService.log(
-            conn,
+        AuditService.record(
+            
             user_id=user["id"],
             username=user["username"],
             action="update_threshold",
