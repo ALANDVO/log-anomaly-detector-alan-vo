@@ -53,3 +53,10 @@ frontend/.vite/
 # OS artifacts
 .DS_Store
 Thumbs.db
+*.pyc
+*.db-wal
+*.db-shm
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
