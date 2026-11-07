@@ -1,8 +1,17 @@
 # Changelog
 
-## 1.4.0 — work-in-progress checkpoint
+## 1.5.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
+
+## 1.4.0 — work-in-progress checkpoint
+
+### Added
+- Frontend test for ThresholdView component (`frontend/src/__tests__/ThresholdView.test.tsx`) covering threshold configuration table rendering, edit/save functionality for analyst/admin roles, read-only mode for viewer role, error handling, and usage notes visibility.
+- Updated feature-plan.json to include frontend test path for detector-threshold-configuration feature.
+
+### Fixed
+- detector-threshold-configuration feature now complete with both backend (6 tests) and frontend (8 tests) test coverage, matching the configurable-service-dependencies feature pattern.
 
 ## 1.3.0 — work-in-progress checkpoint
 

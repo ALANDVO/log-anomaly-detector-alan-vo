@@ -59,7 +59,8 @@
         "frontend/src/components/Navbar.tsx: add Thresholds nav item"
       ],
       "tests": [
-        "backend/tests/test_thresholds.py: new test file for threshold CRUD and detector integration"
+        "backend/tests/test_thresholds.py: new test file for threshold CRUD and detector integration",
+        "frontend/src/__tests__/ThresholdView.test.tsx: new frontend test"
       ]
     }
   ]
