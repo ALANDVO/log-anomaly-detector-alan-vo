@@ -44,4 +44,4 @@ Tests: `backend/tests/test_thresholds.py: new test file for threshold CRUD and d
 
 ---
 
-Alan Vo · [alanvo.net](https://alanvo.net)
+Alan Vo · [alanvo.net](https://alanvo.net) · [X: @alanvoasi](https://x.com/alanvoasi)
