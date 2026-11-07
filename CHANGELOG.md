@@ -53,3 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reproducible ML evaluation pipeline comparing template mining against baseline frequency thresholding on a labeled ground-truth benchmark dataset.
 - React + TypeScript + Vite dashboard with responsive log stream viewer, incident timeline inspection, advisory panel, and evaluation metrics visualization.
 - Production-ready Dockerfiles with non-root security contexts and compose.yaml Keycloak integration.
+
+---
+
+Alan Vo · [alanvo.net](https://alanvo.net)

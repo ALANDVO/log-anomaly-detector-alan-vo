@@ -42,3 +42,6 @@ Implementation: `backend/app/core/database.py: add threshold_config table to ini
 
 Tests: `backend/tests/test_thresholds.py: new test file for threshold CRUD and detector integration`, `frontend/src/__tests__/ThresholdView.test.tsx: new frontend test`
 
+---
+
+Alan Vo · [alanvo.net](https://alanvo.net)
