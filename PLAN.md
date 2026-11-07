@@ -40,5 +40,5 @@ Acceptance:
 
 Implementation: `backend/app/core/database.py: add threshold_config table to init_db with default seeding`, `backend/app/services/detector.py: AnomalyDetector uses database-backed thresholds with caching`, `backend/app/api/thresholds.py: new API router with GET/PUT endpoints`, `backend/app/main.py: register thresholds router`, `backend/app/models/schemas.py: add ThresholdConfig schemas`, `frontend/src/types/index.ts: add ThresholdConfig type`, `frontend/src/api/client.ts: add threshold API methods`, `frontend/src/components/ThresholdView.tsx: new component for threshold management`, `frontend/src/App.tsx: register ThresholdView route`, `frontend/src/components/Navbar.tsx: add Thresholds nav item`
 
-Tests: `backend/tests/test_thresholds.py: new test file for threshold CRUD and detector integration`
+Tests: `backend/tests/test_thresholds.py: new test file for threshold CRUD and detector integration`, `frontend/src/__tests__/ThresholdView.test.tsx: new frontend test`
 
