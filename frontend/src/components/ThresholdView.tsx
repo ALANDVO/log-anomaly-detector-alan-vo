@@ -3,6 +3,30 @@ import { api } from '../api/client';
 import { ThresholdConfig, ThresholdConfigUpdate } from '../types';
 import { RefreshCw, Save, AlertTriangle, Info } from 'lucide-react';
 
+const getThresholdBounds = (configKey: string): { min: number; max: number; step: number } => {
+  switch (configKey) {
+    case 'anomaly_threshold':
+    case 'severity_critical':
+    case 'severity_high':
+    case 'severity_medium':
+    case 'level_critical_weight':
+    case 'level_error_weight':
+    case 'level_warn_weight':
+    case 'rarity_first_occurrence':
+    case 'rarity_under_5':
+    case 'burst_high_density':
+    case 'burst_elevated':
+    case 'entropy_high_bonus':
+    case 'entropy_low_bonus':
+      return { min: 0, max: 1, step: 0.01 };
+    case 'entropy_high_threshold':
+    case 'entropy_low_threshold':
+      return { min: 0, max: 10, step: 0.1 };
+    default:
+      return { min: 0, max: 100, step: 0.01 };
+  }
+};
+
 export const ThresholdView: React.FC<{ canMutate: boolean }> = ({ canMutate }) => {
   const [thresholds, setThresholds] = useState<ThresholdConfig[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,41 +111,44 @@ export const ThresholdView: React.FC<{ canMutate: boolean }> = ({ canMutate }) =
             </tr>
           </thead>
           <tbody>
-            {thresholds.map(t => (
-              <tr key={t.id} className="border-b border-slate-800/50 last:border-0">
-                <td className="py-2 pr-4 font-mono text-slate-300">{t.config_key}</td>
-                <td className="py-2 pr-4 text-slate-200 font-mono">{t.config_value.toFixed(4)}</td>
-                <td className="py-2 pr-4 text-slate-500 max-w-xs truncate">{t.description || '—'}</td>
-                {canMutate && (
-                  <>
-                    <td className="py-2 pr-4">
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="1"
-                        value={editValues[t.config_key] ?? t.config_value}
-                        onChange={e => handleValueChange(t.config_key, parseFloat(e.target.value))}
-                        className="w-24 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                      />
-                    </td>
-                    <td className="py-2">
-                      <button
-                        onClick={() => handleSave(t.config_key)}
-                        disabled={saving[t.config_key] || editValues[t.config_key] === t.config_value}
-                        className="text-xs px-2.5 py-1 bg-cyan-600 hover:bg-cyan-700 disabled:bg-slate-700 disabled:cursor-not-allowed disabled:text-slate-500 text-slate-950 rounded transition flex items-center gap-1"
-                      >
-                        {saving[t.config_key] ? (
-                          <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
-                        ) : (
-                          <Save className="w-3.5 h-3.5" />
-                        )}
-                      </button>
-                    </td>
-                  </>
-                )}
-              </tr>
-            ))}
+            {thresholds.map(t => {
+              const bounds = getThresholdBounds(t.config_key);
+              return (
+                <tr key={t.id} className="border-b border-slate-800/50 last:border-0">
+                  <td className="py-2 pr-4 font-mono text-slate-300">{t.config_key}</td>
+                  <td className="py-2 pr-4 text-slate-200 font-mono">{t.config_value.toFixed(4)}</td>
+                  <td className="py-2 pr-4 text-slate-500 max-w-xs truncate">{t.description || '—'}</td>
+                  {canMutate && (
+                    <>
+                      <td className="py-2 pr-4">
+                        <input
+                          type="number"
+                          step={bounds.step}
+                          min={bounds.min}
+                          max={bounds.max}
+                          value={editValues[t.config_key] ?? t.config_value}
+                          onChange={e => handleValueChange(t.config_key, parseFloat(e.target.value))}
+                          className="w-24 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                        />
+                      </td>
+                      <td className="py-2">
+                        <button
+                          onClick={() => handleSave(t.config_key)}
+                          disabled={saving[t.config_key] || editValues[t.config_key] === t.config_value}
+                          className="text-xs px-2.5 py-1 bg-cyan-600 hover:bg-cyan-700 disabled:bg-slate-700 disabled:cursor-not-allowed disabled:text-slate-500 text-slate-950 rounded transition flex items-center gap-1"
+                        >
+                          {saving[t.config_key] ? (
+                            <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
+                          ) : (
+                            <Save className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </td>
+                    </>
+                  )}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
