@@ -10,6 +10,25 @@ from app.services.detector import AnomalyDetector
 
 router = APIRouter(prefix="/api/thresholds", tags=["Threshold Configuration"])
 
+# Reasonable bounds for threshold values to prevent misconfiguration
+THRESHOLD_BOUNDS = {
+    "anomaly_threshold": (0.0, 1.0),
+    "severity_critical": (0.0, 1.0),
+    "severity_high": (0.0, 1.0),
+    "severity_medium": (0.0, 1.0),
+    "level_critical_weight": (0.0, 1.0),
+    "level_error_weight": (0.0, 1.0),
+    "level_warn_weight": (0.0, 1.0),
+    "rarity_first_occurrence": (0.0, 1.0),
+    "rarity_under_5": (0.0, 1.0),
+    "burst_high_density": (0.0, 1.0),
+    "burst_elevated": (0.0, 1.0),
+    "entropy_high_threshold": (0.0, 10.0),
+    "entropy_high_bonus": (0.0, 1.0),
+    "entropy_low_threshold": (0.0, 10.0),
+    "entropy_low_bonus": (0.0, 1.0),
+}
+
 
 def _row_to_response(row: dict) -> ThresholdConfigResponse:
     return ThresholdConfigResponse(
@@ -20,6 +39,18 @@ def _row_to_response(row: dict) -> ThresholdConfigResponse:
         created_at=row["created_at"],
         updated_at=row["updated_at"],
     )
+
+
+def _validate_threshold_value(config_key: str, value: float) -> None:
+    """Validate that a threshold value is within reasonable bounds."""
+    bounds = THRESHOLD_BOUNDS.get(config_key)
+    if bounds:
+        min_val, max_val = bounds
+        if value < min_val or value > max_val:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Threshold '{config_key}' value {value} is out of bounds [{min_val}, {max_val}]"
+            )
 
 
 @router.get("", response_model=List[ThresholdConfigResponse])
@@ -43,6 +74,9 @@ async def update_threshold(
     _csrf: None = Depends(verify_csrf),
 ):
     """Update a threshold configuration value."""
+    # Validate the new value
+    _validate_threshold_value(config_key, payload.config_value)
+    
     with transaction() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM threshold_config WHERE config_key = ?", (config_key,))

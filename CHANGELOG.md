@@ -1,8 +1,18 @@
 # Changelog
 
-## 1.5.0 — work-in-progress checkpoint
+## 1.6.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
+
+## 1.5.0 — work-in-progress checkpoint
+
+### Fixed
+- Threshold configuration UI: Fixed input bounds for entropy thresholds (`entropy_high_threshold`, `entropy_low_threshold`) which previously couldn't be edited due to hardcoded min/max of 0-1. Added dynamic bounds per threshold type.
+- Backend API: Added server-side validation for threshold values with reasonable bounds per configuration key to prevent misconfiguration.
+
+### Added
+- Frontend `getThresholdBounds()` helper in `ThresholdView.tsx` providing appropriate min/max/step values for each threshold type.
+- Backend `THRESHOLD_BOUNDS` dictionary and `_validate_threshold_value()` function in `thresholds.py` for server-side validation.
 
 ## 1.4.0 — work-in-progress checkpoint
 
@@ -25,7 +35,7 @@ Partial code published for continued development. Known issues: STATUS.md.
 
 All notable changes to `log-anomaly-detector-alan-vo` will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+The format is based on [Keep a Changelog](https://keepchangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.2.0] - 2026-10-15
