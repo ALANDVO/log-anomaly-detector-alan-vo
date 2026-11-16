@@ -1,7 +1,7 @@
 {
   "name": "log-anomaly-detector-frontend",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.7.0",
   "type": "module",
   "author": {
     "name": "Alan Vo",

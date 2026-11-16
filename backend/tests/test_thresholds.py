@@ -9,7 +9,6 @@ import uuid
 
 @pytest.fixture(autouse=True)
 def setup_db():
-    init_db()
     # Clear threshold_config table before each test to ensure isolation
     with transaction() as conn:
         conn.execute("DELETE FROM threshold_config")

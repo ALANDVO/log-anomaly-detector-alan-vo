@@ -63,3 +63,4 @@ Thumbs.db
 .turbo/
 .env.*.local
 **/data/media/
+.venv*/
