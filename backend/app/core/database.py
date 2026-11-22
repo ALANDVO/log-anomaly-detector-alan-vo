@@ -143,6 +143,7 @@ def init_db() -> None:
                 ("entropy_high_bonus", 0.15, "Score bonus for high token entropy"),
                 ("entropy_low_threshold", 1.0, "Token entropy threshold for low entropy bonus"),
                 ("entropy_low_bonus", 0.10, "Score bonus for low token entropy"),
+                ("level_debug_weight", 0.05, "Weight added for DEBUG log level"),
             ]
             cursor.executemany(
                 "INSERT INTO threshold_config (id, config_key, config_value, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
