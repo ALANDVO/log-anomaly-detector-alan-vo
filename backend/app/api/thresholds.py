@@ -27,6 +27,7 @@ THRESHOLD_BOUNDS = {
     "entropy_high_bonus": (0.0, 1.0),
     "entropy_low_threshold": (0.0, 10.0),
     "entropy_low_bonus": (0.0, 1.0),
+    "level_debug_weight": (0.0, 1.0),
 }
 
 

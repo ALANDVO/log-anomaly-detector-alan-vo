@@ -30,6 +30,7 @@ def setup_db():
         ("entropy_high_bonus", 0.15, "Score bonus for high token entropy"),
         ("entropy_low_threshold", 1.0, "Token entropy threshold for low entropy bonus"),
         ("entropy_low_bonus", 0.10, "Score bonus for low token entropy"),
+        ("level_debug_weight", 0.05, "Weight added for DEBUG log level"),
     ]
     with transaction() as conn:
         cursor = conn.cursor()

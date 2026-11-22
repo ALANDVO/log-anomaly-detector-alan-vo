@@ -35,6 +35,7 @@ class AnomalyDetector:
             "level_critical_weight": 0.40,
             "level_error_weight": 0.25,
             "level_warn_weight": 0.10,
+            "level_debug_weight": 0.05,
             "rarity_first_occurrence": 0.35,
             "rarity_under_5": 0.20,
             "burst_high_density": 0.35,
@@ -104,7 +105,9 @@ class AnomalyDetector:
         elif lvl == "ERROR":
             raw_score += thresholds["level_error_weight"]; reasons.append("Error log level")
         elif lvl == "WARN":
-            raw_score += thresholds["level_warn_weight"]
+            raw_score += thresholds["level_warn_weight"]; reasons.append("Warning log level")
+        elif lvl == "DEBUG":
+            raw_score += thresholds["level_debug_weight"]; reasons.append("Debug log level")
 
         rarity_score, rarity_reason = cls.evaluate_template_rarity(template_id)
         raw_score += rarity_score

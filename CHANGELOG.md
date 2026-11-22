@@ -1,8 +1,25 @@
 # Changelog
 
+## 1.8.0 — work-in-progress checkpoint
+
+Partial code published for continued development. Known issues: STATUS.md.
+
 ## 1.7.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
+
+## 1.7.1 — work-in-progress checkpoint
+
+### Added
+- Backend: Added `level_debug_weight` threshold configuration key (default 0.05) for DEBUG log level weighting in anomaly scoring.
+- Backend: Added `level_debug_weight` to database default seeding in `init_db()`.
+- Backend: Added `level_debug_weight` to `THRESHOLD_BOUNDS` validation in `thresholds.py` with bounds (0.0, 1.0).
+- Backend: Added DEBUG level handling in `AnomalyDetector.evaluate()` to include debug weight in raw_score.
+- Backend: Added test for detector using `level_debug_weight` from database.
+- Frontend: Updated `ThresholdView.tsx` to include `level_debug_weight` in threshold management UI.
+
+### Fixed
+- Detector now correctly includes DEBUG log level weight in anomaly score calculation.
 
 ## 1.6.0 — work-in-progress checkpoint
 
