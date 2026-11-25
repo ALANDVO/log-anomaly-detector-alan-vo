@@ -41,3 +41,26 @@ def test_token_entropy_calculation():
     high_tokens = [f"tok_{i}" for i in range(16)]
     high_ent = AnomalyDetector.calculate_token_entropy(high_tokens)
     assert high_ent == 4.0
+
+def test_detector_threshold_fallback_to_defaults():
+    """Test that detector uses default thresholds when DB is empty."""
+    from app.core.database import transaction
+    
+    # Clear threshold_config table
+    with transaction() as conn:
+        conn.execute("DELETE FROM threshold_config")
+    
+    # Invalidate cache so it fetches fresh from (empty) DB
+    AnomalyDetector.invalidate_threshold_cache()
+    
+    # Fetch thresholds - should get defaults
+    thresholds = AnomalyDetector._get_thresholds()
+    
+    # Verify defaults are present
+    assert thresholds["anomaly_threshold"] == 0.50
+    assert thresholds["severity_critical"] == 0.80
+    assert thresholds["severity_high"] == 0.65
+    assert thresholds["severity_medium"] == 0.40
+    assert "anomaly_threshold" in thresholds
+    assert "severity_critical" in thresholds
+
