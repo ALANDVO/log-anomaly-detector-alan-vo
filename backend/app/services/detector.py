@@ -18,7 +18,13 @@ class AnomalyDetector:
 
     @classmethod
     def _get_thresholds(cls) -> Dict[str, float]:
-        """Fetch current threshold configuration from database."""
+        """Fetch current threshold configuration from the SQLite database.
+        
+        If no thresholds are found in the database, hardcoded defaults are used.
+        
+        The result is cached in the class variable _threshold_cache.
+        Call invalidate_threshold_cache() to force a fresh fetch from the database.
+        """
         if cls._threshold_cache is not None:
             return cls._threshold_cache
         with transaction() as conn:
